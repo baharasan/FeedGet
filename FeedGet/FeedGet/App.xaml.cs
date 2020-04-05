@@ -68,7 +68,15 @@ https://gigazine.net/news/rss_2.0/");
                 feed_Data.title = item.Element(nsdef + "title").Value;
                 feed_Data.link = item.Element(nsdef + "link").Value;
                 feed_Data.updatedate = item.Element(nsdc + "date").Value;
-                feed_Data.content = item.Element(nsdef + "description").Value;
+                var desc = item.Element(nsdef + "description");
+                if (desc==null)
+                {
+                    feed_Data.content = "-";
+                }
+                else
+                {
+                    feed_Data.content = desc.Value;
+                }
                 if (feed_Data.content == "")
                 {
                     feed_Data.content = "-";

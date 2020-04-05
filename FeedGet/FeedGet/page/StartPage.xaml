@@ -8,6 +8,10 @@
     <ContentPage.Content>
         <StackLayout>
             <Button x:Name="btn" Text="更新" Clicked="btn_Clicked" />
+            <Editor x:Name="edit"/>
+            <Button  Text="Add_url" Clicked="Button_Clicked"/>
+            <ListView x:Name="listView" BackgroundColor="Black" >
+            </ListView>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
