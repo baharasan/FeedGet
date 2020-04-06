@@ -15,8 +15,9 @@ namespace FeedGet.page
         public FeedPage(App.Feed feed)
         {
             InitializeComponent();
-            label.Text = feed.title;
-            listView.ItemsSource =feed.content;
+            label_title.Text = feed.title;
+            label_updated_time.Text = feed.updatedate;
+            listView.ItemsSource = feed.content;
         }
 
         private void OnItemTapped(object sender, EventArgs e)

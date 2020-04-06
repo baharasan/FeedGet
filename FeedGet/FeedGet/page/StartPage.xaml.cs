@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xamarin.Forms;
@@ -46,65 +47,82 @@ namespace FeedGet.page
             InitializeComponent();
             updateurllist(); 
         }
-        private void btn_Clicked(object sender, EventArgs e)
+        private async void btn_Clicked(object sender, EventArgs e)
         {
+            if (btn.Text == "更新中")
+            {
+                return;
+            }
+            btn.Text = "更新中";
+            
             HttpClient httpClient = new HttpClient();
 
             var directory_path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/" + "feed";
-
+            List<App.Feed> feeds = new List<App.Feed>();
             foreach (var item in File.ReadAllLines(directory_path + "/feed_list.txt"))
             {
                 if (!item.Contains("http"))
                 {
                     continue;
                 }
-                var html = httpClient.GetStringAsync(item).Result;
+                await Task.Run(() =>{
 
-                var filename = Regex.Replace(item, @"http.*//|/|\?", "");
-                File.WriteAllText(directory_path + "/" + filename + ".txt", html);
-                var xDocument = XDocument.Load(directory_path + "/" + filename + ".txt");
-                XNamespace ns = xDocument.Root.GetNamespaceOfPrefix("rdf");
-                if (ns != null && ns.NamespaceName == "http://www.w3.org/1999/02/22-rdf-syntax-ns#")//rss1.0
-                {
-                    var element = xDocument.Element("rss");
-                    if (element == null)
+                    var html = httpClient.GetStringAsync(item).Result;
+                    var filename = Regex.Replace(item, @"http.*//|/|\?", "");
+                    File.WriteAllText(directory_path + "/" + filename + ".txt", html);
+                    var xDocument = XDocument.Load(directory_path + "/" + filename + ".txt");
+                    XNamespace ns = xDocument.Root.GetNamespaceOfPrefix("rdf");
+                    App.Feed feed=new App.Feed();
+                    if (ns != null && ns.NamespaceName == "http://www.w3.org/1999/02/22-rdf-syntax-ns#")//rss1.0
                     {
-                        var feed = App.rss1(xDocument, ns);
-                        var c = new page.FeedPage(feed);
-                        App.carouselPage.Children.Add(c);                        
-                    }
-                    else
-                    {
-                        var feed = App.rss2(element);
-                        var c = new page.FeedPage(feed);
-                        App.carouselPage.Children.Add(c);
-                    }
-                }
-                else
-                {
-                    var element = xDocument.Element("rss");
-                    if (element != null)//rss2.0
-                    {
-                        if (element.Attribute("version").Value == "2.0")
+                        var element = xDocument.Element("rss");
+                        if (element == null)
                         {
-                            var feed = App.rss2(element);
-                            var c = new page.FeedPage(feed);
-                            App.carouselPage.Children.Add(c);
+                            feed = App.rss1(xDocument, ns);
+                        }
+                        else
+                        {
+                            feed = App.rss2(element);
                         }
                     }
                     else
                     {
-                        ns = xDocument.Root.GetDefaultNamespace();
-                        element = xDocument.Element(ns + "feed");
-                        if (element != null)//atom
+                        var element = xDocument.Element("rss");
+                        if (element != null)//rss2.0
                         {
-                            App.atom(element);
+                            if (element.Attribute("version").Value == "2.0")
+                            {
+                                feed = App.rss2(element);
+                            }
                         }
-                    }
+                        else
+                        {
+                            ns = xDocument.Root.GetDefaultNamespace();
+                            element = xDocument.Element(ns + "feed");
+                            if (element != null)//atom
+                            {
+                                feed = App.atom(element,ns);
+                            }
+                        }
 
-                }
+                    }
+                    if (feed.content!=null)
+                    {
+                        feeds.Add(feed);
+                    }
+                });
+
             }
+            var l0 = App.carouselPage.Children[0];
+            App.carouselPage.Children.Clear();
+            App.carouselPage.Children.Add(l0);
+            foreach (var item in feeds)
+            {
+                var c = new page.FeedPage(item);
+                App.carouselPage.Children.Add(c);
 
+            }
+            btn.Text = "更新";
         }
 
         private void Button_Clicked(object sender, EventArgs e)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Web;
 using System.Xml.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -26,7 +27,24 @@ https://gigazine.net/news/rss_2.0/");
             public string title { get; set; }
             public string link { get; set; }
             public string updatedate { get; set; }
-            public string content { get; set; }
+            public string content
+            {
+                get
+                {
+                    //return con;
+                    return HttpUtility.HtmlDecode(con);
+                }
+                set
+                {
+                    var html = "<html><head><title>desc</title></head><body>" + HttpUtility.HtmlDecode(value) + "</body></html>";
+
+                    htmlSource = new HtmlWebViewSource();
+                    htmlSource.Html = html;
+                    con = value;
+                }
+            }
+            private string con;
+            public HtmlWebViewSource htmlSource { get; set; }
         }
         public struct Feed
         {
@@ -136,11 +154,64 @@ https://gigazine.net/news/rss_2.0/");
             return feed;
         }
 
-        static public void atom(XElement element)
+        static public Feed atom(XElement element, XNamespace ns)
         {
-            //
-            return;
+            Feed feed = new Feed();
+            feed.title = element.Element(ns + "title").Value;
+            feed.link = element.Element(ns + "link").Attribute(XName.Get("href")).Value;
+            if (feed.title == "")
+            {
+                feed.title = feed.link;
+            }
+            var updatedate = element.Element(ns + "updated");
+            if (updatedate != null)
+            {
+                feed.updatedate = updatedate.Value;
+            }
+            else
+            {
+                feed.updatedate = "";
+            }
+            if (feed.updatedate == "")
+            {
+                feed.updatedate = element.Element(ns + "entry").Element(ns + "updated").Value;
+            }
+            List<Feed_Data> list = new List<Feed_Data>();
+            foreach (var item in element.Elements(ns + "entry"))
+            {
+                Feed_Data feed_Data = new Feed_Data();
+                feed_Data.title = item.Element(ns + "title").Value;
+                feed_Data.link = item.Element(ns + "link").Attribute(XName.Get("href")).Value;
+                feed_Data.updatedate = item.Element(ns + "updated").Value;
+                var desc = item.Element(ns + "content");
+                if (desc != null)
+                {
+                    feed_Data.content = desc.Value;
+                    //desc = item.Element(ns + "summary");
+                    //feed_Data.content = desc.Value;
+                }
+                else
+                {
+                    desc = item.Element(ns + "summary");
+                    if (desc != null)
+                    {
+                        feed_Data.content = desc.Value;
+                    }
+                    else
+                    {
+                        feed_Data.content = "";
+                    }
+                }
+                if (feed_Data.content == "")
+                {
+                    feed_Data.content = "-";
+                }
+                list.Add(feed_Data);
+            }
+            feed.content = list;
+            return feed;
         }
+
 
         static public CarouselPage carouselPage;
 
