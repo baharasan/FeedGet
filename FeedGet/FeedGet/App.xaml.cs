@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml.Linq;
 using Xamarin.Forms;
@@ -26,7 +27,25 @@ https://gigazine.net/news/rss_2.0/");
         {
             public string title { get; set; }
             public string link { get; set; }
-            public string updatedate { get; set; }
+            private string updateda;
+            public string updatedate
+            {
+                get
+                {
+                    if (updateda == "")
+                    {
+                        return "";
+                    }
+                    DateTime dateTime = DateTime.Parse(updateda);
+                    var localTime = dateTime.ToLocalTime();
+                    return localTime.ToString();
+                }
+                set
+                {
+                    updateda = value;
+                }
+            }
+            private string con;
             public string content
             {
                 get
@@ -43,14 +62,30 @@ https://gigazine.net/news/rss_2.0/");
                     con = value;
                 }
             }
-            private string con;
             public HtmlWebViewSource htmlSource { get; set; }
         }
         public struct Feed
         {
             public string title;
             public string link;
-            public string updatedate;
+            private string updateda;
+            public string updatedate
+            {
+                get
+                {
+                    if (updateda=="")
+                    {
+                        return "";
+                    }
+                    DateTime dateTime = DateTime.Parse(updateda);
+                    var localTime = dateTime.ToLocalTime();
+                    return localTime.ToString();
+                }
+                set
+                {
+                    updateda = value;
+                }
+            }
             public List<Feed_Data> content;
         }
 
@@ -61,7 +96,7 @@ https://gigazine.net/news/rss_2.0/");
 
             XNamespace nsdef = xDocument.Root.GetDefaultNamespace();
             var channel = element.Element(nsdef + "channel");
-            Feed feed;
+            Feed feed=new Feed();
             feed.title = channel.Element(nsdef + "title").Value;
             feed.link = channel.Element(nsdef + "link").Value;
 
