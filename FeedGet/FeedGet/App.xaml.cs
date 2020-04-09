@@ -19,7 +19,8 @@ https://www.4gamer.net/rss/index.xml
 
 //rss2.0
 https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml
-https://gigazine.net/news/rss_2.0/");
+//atom
+https://www.publickey1.jp/atom.xml");
         }
 
 
@@ -27,7 +28,7 @@ https://gigazine.net/news/rss_2.0/");
         {
             public string title { get; set; }
             public string link { get; set; }
-            private string updateda;
+            public string updateda;
             public string updatedate
             {
                 get
@@ -66,9 +67,10 @@ https://gigazine.net/news/rss_2.0/");
         }
         public struct Feed
         {
+            public string url;
             public string title;
             public string link;
-            private string updateda;
+            public string updateda;
             public string updatedate
             {
                 get
@@ -90,13 +92,14 @@ https://gigazine.net/news/rss_2.0/");
         }
 
 
-        static public Feed rss1(XDocument xDocument, XNamespace ns)
+        static public Feed rss1(XDocument xDocument, XNamespace ns,string url)
         {
             var element = xDocument.Element(ns + "RDF");
 
             XNamespace nsdef = xDocument.Root.GetDefaultNamespace();
             var channel = element.Element(nsdef + "channel");
             Feed feed=new Feed();
+            feed.url = url;
             feed.title = channel.Element(nsdef + "title").Value;
             feed.link = channel.Element(nsdef + "link").Value;
 
@@ -140,10 +143,11 @@ https://gigazine.net/news/rss_2.0/");
             return feed;
         }
 
-        static public Feed rss2(XElement element)
+        static public Feed rss2(XElement element, string url)
         {
             var channel = element.Element("channel");
             Feed feed = new Feed();
+            feed.url = url;
             feed.title = channel.Element("title").Value;
             feed.link = channel.Element("link").Value;
             if (feed.title == "")
@@ -157,7 +161,15 @@ https://gigazine.net/news/rss_2.0/");
             }
             else
             {
-                feed.updatedate = "";
+                var lastBuildDate = channel.Element("lastBuildDate");
+                if (lastBuildDate != null)
+                {
+                    feed.updatedate = lastBuildDate.Value;
+                }
+                else
+                {
+                    feed.updatedate = "";
+                }
             }
             if (feed.updatedate == "")
             {
@@ -189,9 +201,10 @@ https://gigazine.net/news/rss_2.0/");
             return feed;
         }
 
-        static public Feed atom(XElement element, XNamespace ns)
+        static public Feed atom(XElement element, XNamespace ns,string url)
         {
             Feed feed = new Feed();
+            feed.url = url;
             feed.title = element.Element(ns + "title").Value;
             feed.link = element.Element(ns + "link").Attribute(XName.Get("href")).Value;
             if (feed.title == "")
@@ -247,8 +260,57 @@ https://gigazine.net/news/rss_2.0/");
             return feed;
         }
 
+        static public Feed getfeedxml(string filename)
+        {
+            Feed feed = new Feed();
+            var xDocument = XDocument.Load(filename);
+            var element = xDocument.Element("Feed");
+            feed.updatedate = element.Element("updatedate").Value;
+            feed.url = element.Element("url").Value;
+            feed.title = element.Element("title").Value;
+            feed.link = element.Element("link").Value;
+            var zzz = element.Elements("Feed_Data");
+            List<Feed_Data> feed_s = new List<Feed_Data>();
+            foreach (var item in zzz)
+            {
+                Feed_Data feed_data = new Feed_Data();
+                feed_data.updatedate = item.Element("updatedate").Value;
+                feed_data.title = item.Element("title").Value;
+                feed_data.link = item.Element("link").Value;
+                feed_data.content = item.Element("content").Value;
+                feed_s.Add(feed_data);
+            }
+            feed.content = feed_s;
+            return feed;
+        }
+
+        static public void setfeedxml(Feed feed, string filename)
+        {
+            var xDocument0 = new XDocument();
+            XDeclaration xmlDeclaration = new XDeclaration("1.0", "utf-8", "yes");
+            xDocument0.Declaration = xmlDeclaration;
+            XElement xeFeed = new XElement("Feed");
+            xeFeed.Add(new XElement("url", feed.url));
+            xeFeed.Add(new XElement("title", feed.title));
+            xeFeed.Add(new XElement("link", feed.link));
+            xeFeed.Add(new XElement("updatedate", feed.updateda));
+            foreach (var item in feed.content)
+            {
+                XElement xeFeedDate = new XElement("Feed_Data");
+                xeFeedDate.Add(new XElement("title", item.title));
+                xeFeedDate.Add(new XElement("link", item.link));
+                xeFeedDate.Add(new XElement("updatedate", item.updateda));
+                xeFeedDate.Add(new XElement("content", item.content));
+                xeFeed.Add(xeFeedDate);
+            }
+            xDocument0.Add(xeFeed);
+            xDocument0.Save(filename);
+        }
+
+
 
         static public CarouselPage carouselPage;
+        static public IList<ContentPage> lc;
 
 
         public App()
@@ -267,10 +329,19 @@ https://gigazine.net/news/rss_2.0/");
 
         protected override void OnStart()
         {
+            if (lc!=null)
+            {
+                carouselPage.Children.Clear();
+                foreach (var item in lc)
+                {
+                    carouselPage.Children.Add(item);
+                }
+            }
         }
 
         protected override void OnSleep()
         {
+            lc = carouselPage.Children;
         }
 
         protected override void OnResume()

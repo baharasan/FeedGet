@@ -28,6 +28,7 @@ namespace FeedGet.page
 
             if (File.Exists(directory_path + "/feed_list.txt"))
             {
+                btn.Text = "更新中";
                 var urll = File.ReadAllLines(directory_path + "/feed_list.txt");
                 List<string> ts = new List<string>();
                 foreach (var item in urll)
@@ -38,14 +39,38 @@ namespace FeedGet.page
                     }
                 }
 
+
+                var l0 = App.carouselPage.Children[0];
+                App.carouselPage.Children.Clear();
+                App.carouselPage.Children.Add(l0);
+
+                var ng = Path.GetInvalidFileNameChars();                
+                foreach (var item in ts)
+                {
+                    var filename = item + ".txt";
+                    foreach (var item1 in ng)
+                    {
+                        filename = filename.Replace(item1, ' ');
+                    }
+                    if (File.Exists(directory_path+"/"+filename))
+                    {
+                        var ss = App.getfeedxml(directory_path + "/" + filename);
+                        var c = new page.FeedPage(ss);
+                        App.carouselPage.Children.Add(c);
+                    }
+                }
+
                 listView.ItemsSource = ts;
+                btn.Text = "更新";
             }
         }
 
         public StartPage()
         {
             InitializeComponent();
-            updateurllist(); 
+            Task.Run(() => {
+                updateurllist();
+            });
         }
         private async void btn_Clicked(object sender, EventArgs e)
         {
@@ -78,11 +103,11 @@ namespace FeedGet.page
                         var element = xDocument.Element("rss");
                         if (element == null)
                         {
-                            feed = App.rss1(xDocument, ns);
+                            feed = App.rss1(xDocument, ns, item);
                         }
                         else
                         {
-                            feed = App.rss2(element);
+                            feed = App.rss2(element, item);
                         }
                     }
                     else
@@ -92,7 +117,7 @@ namespace FeedGet.page
                         {
                             if (element.Attribute("version").Value == "2.0")
                             {
-                                feed = App.rss2(element);
+                                feed = App.rss2(element, item);
                             }
                         }
                         else
@@ -101,13 +126,14 @@ namespace FeedGet.page
                             element = xDocument.Element(ns + "feed");
                             if (element != null)//atom
                             {
-                                feed = App.atom(element,ns);
+                                feed = App.atom(element,ns, item);
                             }
                         }
 
                     }
                     if (feed.content!=null)
                     {
+                        feed.url = item;
                         feeds.Add(feed);
                     }
                 });
@@ -118,8 +144,51 @@ namespace FeedGet.page
             App.carouselPage.Children.Add(l0);
             foreach (var item in feeds)
             {
-                var c = new page.FeedPage(item);
-                App.carouselPage.Children.Add(c);
+                var ng=Path.GetInvalidFileNameChars();
+                var filename = item.url+".txt";
+                foreach (var item1 in ng)
+                {
+                    filename = filename.Replace( item1,' ');
+                }
+                if(!File.Exists(directory_path + "/" + filename))
+                {
+                    App.setfeedxml(item, directory_path + "/" + filename);
+                    var c = new page.FeedPage(item);
+                    App.carouselPage.Children.Add(c);
+                }
+                else
+                {
+                    var oldfeed=App.getfeedxml(directory_path + "/" + filename);
+                    DateTime oldTime = DateTime.Parse(oldfeed.updatedate);
+                    DateTime newTime = DateTime.Parse(item.updatedate);
+                    var x= newTime - oldTime;
+                    if (x.TotalSeconds>0)
+                    {
+                        item.content.Reverse();
+                        foreach (var content in item.content) 
+                        {
+                            var xz = oldfeed.content.Find((a)=>
+                            {
+                                return a.link==content.link;
+                            }) ;
+
+                            if (xz.link==null)
+                            {
+                                oldfeed.content.Insert(0,content);
+                            }
+                        }
+                        item.content.Reverse();
+                        oldfeed.updateda = item.updateda;
+                        App.setfeedxml(oldfeed, directory_path + "/" + filename);
+                        var c = new page.FeedPage(oldfeed);
+                        App.carouselPage.Children.Add(c);
+                    }
+                    else
+                    {
+                        var c = new page.FeedPage(item);
+                        App.carouselPage.Children.Add(c);
+                    }
+                }
 
             }
             btn.Text = "更新";

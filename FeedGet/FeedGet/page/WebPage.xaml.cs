@@ -17,5 +17,10 @@ namespace FeedGet.page
             InitializeComponent();
             webview.Source = feed.link;
         }
+
+        private void webview_Navigated(object sender, WebNavigatedEventArgs e)
+        {
+            edit.Text = e.Url;
+        }
     }
 }

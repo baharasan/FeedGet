@@ -7,7 +7,8 @@
              x:Class="FeedGet.page.WebPage">
     <ContentPage.Content>
         <StackLayout>
-            <WebView x:Name="webview" Source="" VerticalOptions="FillAndExpand" />
+            <Editor x:Name="edit" />
+            <WebView x:Name="webview" Source="" VerticalOptions="FillAndExpand" Navigated="webview_Navigated" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
