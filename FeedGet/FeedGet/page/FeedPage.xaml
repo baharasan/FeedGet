@@ -13,9 +13,10 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <StackLayout>
+                            <StackLayout Margin="10,15,10,15" >
                                 <Label Text="{Binding title}" LineBreakMode="WordWrap" TextColor="#f35e20" />
                                 <Label Text="{Binding content}" LineBreakMode="WordWrap" TextColor="White" />
+                                <Image Source="{Binding image}" />
                                 <Label Text="{Binding updatedate}" TextColor="Yellow" HorizontalOptions="EndAndExpand" />
                             </StackLayout>
                         </ViewCell>

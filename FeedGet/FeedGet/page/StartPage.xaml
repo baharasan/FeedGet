@@ -5,12 +5,28 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="FeedGet.page.StartPage">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Reload" Order="Primary" Clicked="btn_Clicked"/>
+        <ToolbarItem Text="ADD URL" Order="Secondary" Clicked="ToolbarItem_AddURL_Clicked"/>
+    </ContentPage.ToolbarItems>
+
     <ContentPage.Content>
+
         <StackLayout>
             <Button x:Name="btn" Text="更新" Clicked="btn_Clicked" />
-            <Editor x:Name="edit"/>
-            <Button  Text="Add_url" Clicked="Button_Clicked"/>
-            <ListView x:Name="listView" BackgroundColor="Black" >
+            <ListView x:Name="listView" BackgroundColor="Black" HasUnevenRows="True" ItemTapped="listView_ItemTapped" Refreshing="listView_Refreshing"  IsPullToRefreshEnabled="True" >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Margin="20,10,20,10">
+                                <Label Text="{Binding title}" LineBreakMode="WordWrap" TextColor="#f35e20" />
+                                <Label Text="{Binding url}" LineBreakMode="WordWrap" TextColor="White" />
+                                <Label Text="{Binding updatedate}" TextColor="Yellow" HorizontalOptions="EndAndExpand" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
             </ListView>
         </StackLayout>
     </ContentPage.Content>

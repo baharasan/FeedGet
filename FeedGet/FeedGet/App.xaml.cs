@@ -15,12 +15,9 @@ namespace FeedGet
         static public void init(string directory_path)
         {
             File.WriteAllText(directory_path + "/feed_list.txt", @"//rss1.0
+https://pc.watch.impress.co.jp/data/rss/1.0/pcw/feed.rdf
 https://www.4gamer.net/rss/index.xml
-
-//rss2.0
-https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml
-//atom
-https://www.publickey1.jp/atom.xml");
+");
         }
 
 
@@ -60,16 +57,33 @@ https://www.publickey1.jp/atom.xml");
 
                     htmlSource = new HtmlWebViewSource();
                     htmlSource.Html = html;
+
+                    var im = Regex.Match(value, @"<img.*?src=.*?>");
+                    if (im.Length == 0)
+                    {
+                        im = Regex.Match(value, @"(i|I)mage: ?http.*?(\.png|\.gif|\.jpg|\.jpeg)");
+                        if (im.Length != 0)
+                        {
+                            image = Regex.Replace(im.Value, @"(i|I)mage: ?", "");
+                        }
+                    }
+                    else
+                    {
+                        im=Regex.Match(im.Value, "src=('|\").*?('|\")");
+                        image = Regex.Replace(im.Value, "src=|('|\")", "");
+                    }
                     con = value;
                 }
             }
             public HtmlWebViewSource htmlSource { get; set; }
+            public string image { get; set; }
         }
         public struct Feed
         {
-            public string url;
-            public string title;
-            public string link;
+            public string url { get; set; }
+            public string title { get; set; }
+            public string link { get; set; }
+            public string lastaclink { get; set; }
             public string updateda;
             public string updatedate
             {
@@ -117,6 +131,7 @@ https://www.publickey1.jp/atom.xml");
                     feed.updatedate = element.Element(nsdef + "item").Element(nsdc + "date").Value;
                 }
             }
+            feed.updatedate = element.Element(nsdef + "item").Element(nsdc + "date").Value;
             List<Feed_Data> list = new List<Feed_Data>();
             foreach (var item in element.Elements(nsdef + "item"))
             {
@@ -175,6 +190,7 @@ https://www.publickey1.jp/atom.xml");
             {
                 feed.updatedate = channel.Element("item").Element("pubDate").Value;
             }
+            feed.updatedate = channel.Element("item").Element("pubDate").Value;
             List<Feed_Data> list = new List<Feed_Data>();
             foreach (var item in channel.Elements("item"))
             {
@@ -224,6 +240,7 @@ https://www.publickey1.jp/atom.xml");
             {
                 feed.updatedate = element.Element(ns + "entry").Element(ns + "updated").Value;
             }
+            feed.updatedate = element.Element(ns + "entry").Element(ns + "updated").Value;
             List<Feed_Data> list = new List<Feed_Data>();
             foreach (var item in element.Elements(ns + "entry"))
             {
@@ -269,6 +286,7 @@ https://www.publickey1.jp/atom.xml");
             feed.url = element.Element("url").Value;
             feed.title = element.Element("title").Value;
             feed.link = element.Element("link").Value;
+            feed.lastaclink = element.Element("lastaclink").Value;
             var zzz = element.Elements("Feed_Data");
             List<Feed_Data> feed_s = new List<Feed_Data>();
             foreach (var item in zzz)
@@ -293,6 +311,7 @@ https://www.publickey1.jp/atom.xml");
             xeFeed.Add(new XElement("url", feed.url));
             xeFeed.Add(new XElement("title", feed.title));
             xeFeed.Add(new XElement("link", feed.link));
+            xeFeed.Add(new XElement("lastaclink", feed.lastaclink));
             xeFeed.Add(new XElement("updatedate", feed.updateda));
             foreach (var item in feed.content)
             {
@@ -308,14 +327,21 @@ https://www.publickey1.jp/atom.xml");
         }
 
 
-
+        /*
         static public CarouselPage carouselPage;
         static public IList<ContentPage> lc;
+        */
 
+        static public NavigationPage navigationPage;
+
+
+        static public List<Feed> startpage_list;
+        static public page.StartPage startpage;
 
         public App()
         {
             InitializeComponent();
+            /*
             var carouselPage0 = new CarouselPage()
             {
                 Children =
@@ -325,10 +351,16 @@ https://www.publickey1.jp/atom.xml");
             };
             carouselPage = carouselPage0;
             MainPage = carouselPage0;
+            */
+            navigationPage = new NavigationPage();
+            startpage = new page.StartPage();
+            navigationPage.PushAsync(startpage);
+            MainPage = navigationPage;
         }
 
         protected override void OnStart()
         {
+            /*
             if (lc!=null)
             {
                 carouselPage.Children.Clear();
@@ -337,11 +369,20 @@ https://www.publickey1.jp/atom.xml");
                     carouselPage.Children.Add(item);
                 }
             }
+            */
+            if (startpage != null)
+            {
+                if (startpage_list != null)
+                {
+                    startpage.resumelist(startpage_list);
+                }
+            }
+            return;
         }
 
         protected override void OnSleep()
         {
-            lc = carouselPage.Children;
+            //lc = carouselPage.Children;
         }
 
         protected override void OnResume()
