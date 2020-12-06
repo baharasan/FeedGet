@@ -4,13 +4,13 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="FeedGet.page.StartPage_AddURL">
+             x:Class="FeedGet.page.StartPage_UpdateTime">
     <ContentPage.Content>
         <StackLayout>
+            <Label Text="自動更新時間を入力 分単位" />
             <Editor x:Name="edit"/>
-            <Button  Text="Add_url" Clicked="Button_Clicked"/>
-            <ListView x:Name="listView" BackgroundColor="Black" ItemTapped="listView_ItemTapped" >
-            </ListView>
+            <Button  Text="Change" Clicked="Button_Clicked"/>
+            <Label x:Name="ketei" Text="" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

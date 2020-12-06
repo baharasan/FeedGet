@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -41,6 +41,7 @@ namespace FeedGet.page
                     }
                 }
 
+                edit.Text = ts.Count.ToString();
                 var ng = Path.GetInvalidFileNameChars();
                 foreach (var item in ts)
                 {
@@ -51,7 +52,15 @@ namespace FeedGet.page
                     }
                     if (File.Exists(directory_path + "/" + filename))
                     {
-                        var ss = App.getfeedxml(directory_path + "/" + filename);
+                        try
+                        {
+                            var ss = App.getfeedxml(directory_path + "/" + filename);
+
+                        }
+                        catch (Exception)
+                        {
+                            continue;
+                        }
                     }
                 }
 
@@ -89,5 +98,39 @@ namespace FeedGet.page
             updateurllist();
         }
 
+        private async void listView_ItemTapped(object sender, ItemTappedEventArgs e)
+        {
+            var retult = await DisplayActionSheet("選択してください", "キャンセル", "削除", "コピー");
+            //返された文字列でボタンテキストを書き換える
+            if (retult== "削除")
+            {
+                var v = (List<string>)listView.ItemsSource;
+                if (v == null)
+                {
+                    return;
+                }
+                var z = v.IndexOf(e.Item.ToString());
+                try
+                {
+                    v.RemoveAt(z);
+                }
+                catch (Exception)
+                {
+
+                }
+                var directory_path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/" + "feed";
+                var ee = "";
+                foreach (var item in v)
+                {
+                    ee += item + "\r\n";
+                }
+                File.WriteAllText(directory_path + "/feed_list.txt", ee);
+                updateurllist();
+            }
+            else if (retult=="コピー")
+            {
+                Clipboard.SetTextAsync(e.Item.ToString());
+            }
+        }
     }
 }

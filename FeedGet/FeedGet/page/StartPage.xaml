@@ -8,13 +8,16 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Reload" Order="Primary" Clicked="btn_Clicked"/>
-        <ToolbarItem Text="ADD URL" Order="Secondary" Clicked="ToolbarItem_AddURL_Clicked"/>
+        <ToolbarItem Text="Add URL" Order="Secondary" Clicked="ToolbarItem_AddURL_Clicked"/>
+        <ToolbarItem Text="Update Time Change" Order="Secondary" Clicked="ToolbarItem_Update_Time_Change"/>
+        <ToolbarItem Text="Search" Order="Secondary" Clicked="ToolbarItem_Clicked"/>
+        <ToolbarItem Text="Init" Order="Secondary" Clicked="ToolbarItem_Init_Clicked"/>
     </ContentPage.ToolbarItems>
 
     <ContentPage.Content>
 
         <StackLayout>
-            <Button x:Name="btn" Text="更新" Clicked="btn_Clicked" />
+            <Label x:Name="label" Text="" />
             <ListView x:Name="listView" BackgroundColor="Black" HasUnevenRows="True" ItemTapped="listView_ItemTapped" Refreshing="listView_Refreshing"  IsPullToRefreshEnabled="True" >
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -22,6 +25,7 @@
                             <StackLayout Margin="20,10,20,10">
                                 <Label Text="{Binding title}" LineBreakMode="WordWrap" TextColor="#f35e20" />
                                 <Label Text="{Binding url}" LineBreakMode="WordWrap" TextColor="White" />
+                                <Label Text="{Binding newfeedco}" LineBreakMode="WordWrap" TextColor="White" />
                                 <Label Text="{Binding updatedate}" TextColor="Yellow" HorizontalOptions="EndAndExpand" />
                             </StackLayout>
                         </ViewCell>

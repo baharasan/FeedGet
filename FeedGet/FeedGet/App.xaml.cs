@@ -17,6 +17,78 @@ namespace FeedGet
             File.WriteAllText(directory_path + "/feed_list.txt", @"//rss1.0
 https://pc.watch.impress.co.jp/data/rss/1.0/pcw/feed.rdf
 https://www.4gamer.net/rss/index.xml
+https://forest.watch.impress.co.jp/data/rss/1.0/wf/feed.rdf
+https://tech.nikkeibp.co.jp/rss/xtech-it.rdf
+http://feeds.japan.cnet.com/rss/cnet/all.rdf
+https://www.watch.impress.co.jp/vr/vr.xml
+https://northwood.blog.fc2.com/?xml=
+http://maya.indyzone.jp/feed/
+http://c-imp.sblo.jp/index.rdf
+http://masafumi.cocolog-nifty.com/masafumis_diary/index.rdf
+https://www.gamespark.jp/rss/index.rdf
+
+//rss2.0
+https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml
+https://gigazine.net/news/rss_2.0/
+http://www.oshiete-kun.net/index.xml
+https://dev.classmethod.jp/feed/
+http://zerogram.info/?feed=rss2
+https://codezine.jp/rss/new/20/index.xml
+https://www.pixivision.net/ja/rss
+https://framesynthesis.jp/tech/index.xml
+http://h.javtorrent.re/feed/
+http://www.anime-sharing.com/forum/external.php?type=RSS2&forumids=47
+https://www.reddit.com/user/FitGirlLV/.rss
+http://imoue.hatenablog.com/rss
+http://www.rlslog.net/category/games/pc/feed/
+https://gihyo.jp/feed/rss2
+
+https://rss.itmedia.co.jp/rss/2.0/techfactory.xml
+https://rss.itmedia.co.jp/rss/2.0/techtarget.xml
+https://rss.itmedia.co.jp/rss/2.0/keymans.xml
+https://rss.itmedia.co.jp/rss/2.0/ait.xml
+https://rss.itmedia.co.jp/rss/2.0/business.xml
+https://rss.itmedia.co.jp/rss/2.0/pcuser.xml
+https://rss.itmedia.co.jp/rss/2.0/mobile.xml
+
+https://jp.techcrunch.com/feed
+
+https://haxnode.com/feed/
+https://www.downloadpirate.com/feed/
+https://www.iiicg.com/feed
+
+https://www.moguravr.com/feed
+https://automaton-media.com/feed/
+
+https://3dnchu.com/feed/
+
+https://ascii.jp/tech/rss.xml
+https://ascii.jp/digital/rss.xml
+https://ascii.jp/hobby/rss.xml
+https://ascii.jp/pc/rss.xml
+
+https://www.aeblender.com/feed/
+http://iiidea.cn/feed
+http://www.gfxcamp.com/feed/
+https://godownloads.net/feed/
+
+//atom
+https://www.publickey1.jp/atom.xml
+http://monsho.hatenablog.com/feed
+http://wololo.net/feed/
+http://feeds.feedburner.com/giveawayoftheday/xFAb
+http://gamestorrent.co/feed
+
+
+
+
+
+https://www.famitsu.com/rss/fcom_all.rdf
+
+
+
+
+
 ");
         }
 
@@ -84,6 +156,7 @@ https://www.4gamer.net/rss/index.xml
             public string title { get; set; }
             public string link { get; set; }
             public string lastaclink { get; set; }
+            public string newfeedco { get; set; }
             public string updateda;
             public string updatedate
             {
@@ -280,13 +353,22 @@ https://www.4gamer.net/rss/index.xml
         static public Feed getfeedxml(string filename)
         {
             Feed feed = new Feed();
-            var xDocument = XDocument.Load(filename);
+            XDocument xDocument;
+            try
+            {
+                xDocument = XDocument.Load(filename);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
             var element = xDocument.Element("Feed");
             feed.updatedate = element.Element("updatedate").Value;
             feed.url = element.Element("url").Value;
             feed.title = element.Element("title").Value;
             feed.link = element.Element("link").Value;
             feed.lastaclink = element.Element("lastaclink").Value;
+            feed.newfeedco = element.Element("newfeedco").Value;
             var zzz = element.Elements("Feed_Data");
             List<Feed_Data> feed_s = new List<Feed_Data>();
             foreach (var item in zzz)
@@ -312,6 +394,7 @@ https://www.4gamer.net/rss/index.xml
             xeFeed.Add(new XElement("title", feed.title));
             xeFeed.Add(new XElement("link", feed.link));
             xeFeed.Add(new XElement("lastaclink", feed.lastaclink));
+            xeFeed.Add(new XElement("newfeedco", feed.newfeedco));
             xeFeed.Add(new XElement("updatedate", feed.updateda));
             foreach (var item in feed.content)
             {

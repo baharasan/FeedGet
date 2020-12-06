@@ -4,17 +4,10 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="FeedGet.page.FeedPage">
-
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Search" Order="Primary" Clicked="ToolbarItem_Clicked"/>
-    </ContentPage.ToolbarItems>
-
-
+             x:Class="FeedGet.page.FeedPage_Search">
     <ContentPage.Content>
         <StackLayout>
-            <Label x:Name="label_title"></Label>
-            <Label x:Name="label_updated_time" HorizontalOptions="EndAndExpand"></Label>
+            <SearchBar Placeholder="" TextChanged="SearchBar_TextChanged" />
             <ListView x:Name="listView" BackgroundColor="Black" HasUnevenRows="True" ItemTapped="OnItemTapped">
                 <ListView.ItemTemplate>
                     <DataTemplate>

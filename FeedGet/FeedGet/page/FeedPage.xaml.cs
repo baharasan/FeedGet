@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -22,7 +22,9 @@ namespace FeedGet.page
             label_title.Text = feed.title;
             label_updated_time.Text = feed.updatedate;
 
-            
+            feed.content.Reverse();
+
+
             int i = 1;
             List<App.Feed_Data> n = new List<App.Feed_Data>();
             foreach (var item in feed.content)
@@ -43,7 +45,7 @@ namespace FeedGet.page
                     if (item.link == feed.lastaclink)
                     {
                         listView.SelectedItem = item;
-                        listView.ScrollTo(listView.SelectedItem, ScrollToPosition.End, false);
+                        listView.ScrollTo(listView.SelectedItem, ScrollToPosition.Start, false);
                         break;
                     }
                 }
@@ -61,15 +63,49 @@ namespace FeedGet.page
             {
                 filename = filename.Replace(item1, ' ');
             }
-
-            this.feed = App.getfeedxml(directory_path + "/" + filename+".txt");
+            try
+            {
+                this.feed = App.getfeedxml(directory_path + "/" + filename + ".txt");
+            }
+            catch (Exception)
+            {
+                return;
+            }
             this.feed.lastaclink = x.link;
+
+            for (int i = 0; i < this.feed.content.Count; i++)
+            {
+                if (this.feed.lastaclink == this.feed.content[i].link)
+                {
+                    if (i==0)
+                    {
+                        this.feed.newfeedco = "";
+                        break;
+                    }
+                    this.feed.newfeedco = i.ToString();
+                    break;
+                }
+            }
+
             App.setfeedxml(this.feed, directory_path + "/" + filename+".txt");
 
             var webpage = new WebPage(x);
-            Navigation.PushModalAsync(webpage);
+            //Navigation.PushModalAsync(webpage);
+            
+            Browser.OpenAsync(x.link, new BrowserLaunchOptions
+            {
+                LaunchMode = BrowserLaunchMode.SystemPreferred,
+                TitleMode = BrowserTitleMode.Default
+            });
+
             //Application.Current.MainPage = webpage;
         }
 
+        //Search
+        private void ToolbarItem_Clicked(object sender, EventArgs e)
+        {
+            App.navigationPage.PushAsync(new FeedPage_Search(feed));
+
+        }
     }
 }
