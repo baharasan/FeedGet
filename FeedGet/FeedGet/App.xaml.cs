@@ -27,6 +27,8 @@ http://c-imp.sblo.jp/index.rdf
 http://masafumi.cocolog-nifty.com/masafumis_diary/index.rdf
 https://www.gamespark.jp/rss/index.rdf
 
+https://ada211.blogspot.com/rss.xml
+
 //rss2.0
 https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml
 https://gigazine.net/news/rss_2.0/

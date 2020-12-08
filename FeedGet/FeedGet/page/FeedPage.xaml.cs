@@ -31,6 +31,14 @@ namespace FeedGet.page
             {
                 App.Feed_Data tm = item;
                 tm.title = i.ToString() + "." + item.title;
+
+                //上から1000まで表示 20201208
+                if (tm.content.Length>1000)
+                {
+                    tm.content = tm.content.Substring(0, 1000)+"... hide "+1000.ToString()+"/"+tm.content.Length.ToString();
+                }
+                
+
                 n.Add(tm);
                 i++;
             }
